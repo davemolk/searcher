@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
+	"sync"
 )
 
 // readInput takes in the file name for a list of terms and returns
@@ -27,7 +29,7 @@ func (s *searcher) readInput(name string) ([]string, error) {
 
 // getTerms looks at the user flag input, determines whether a single
 // term or a file name for a list of terms has been selected, and
-// adds the appropriate field to the fof struct instance.
+// adds the appropriate field to the searcher struct instance.
 func (s *searcher) getTerms() {
 	switch {
 	case s.config.file != "":
@@ -37,8 +39,30 @@ func (s *searcher) getTerms() {
 		}
 		s.terms = terms
 	default:
-		s.errorLog.Println("No search terms supplied. Continuing with search target only.")
+		s.errorLog.Println("No additional search terms supplied. Continuing with base search only.")
 	}
+}
+
+func (s *searcher) launchWriters() <-chan struct{} {
+	ch := make(chan struct{}, 1)
+
+	var wg sync.WaitGroup
+
+	for _, t := range s.terms {
+		wg.Add(1)
+		go func(t string) {
+			defer wg.Done()
+			name := fmt.Sprintf("data/%s.json", t)
+			s.writeData(name, s.searches.searches[t])
+		}(t)
+	}
+
+	go func() {
+		defer close(ch)
+		wg.Wait()
+	}()
+
+	return ch
 }
 
 func (s *searcher) writeData(name string, data map[string]string) {

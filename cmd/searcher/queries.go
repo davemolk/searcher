@@ -118,7 +118,7 @@ func (s *searcher) makeParseData() []*parseData {
 
 func (s *searcher) makeQueryString(wg *sync.WaitGroup, data *queryData, term string, ch chan string) {
 	defer wg.Done()
-	cleanQ := strings.Replace(s.config.searchTarget, " ", data.spacer, -1)
+	cleanQ := strings.Replace(s.config.baseSearch, " ", data.spacer, -1)
 	var url string
 	if s.config.exact {
 		url = fmt.Sprintf("%s\"%s%s%s\"", data.base, cleanQ, data.spacer, term)
