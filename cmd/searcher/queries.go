@@ -19,7 +19,9 @@ type parseData struct {
 }
 
 func (s *searcher) makeQueryData() []*queryData {
-	s.infoLog.Println("Making slice of query data...")
+	if s.config.verbose {
+		s.infoLog.Println("Making slice of query data...")
+	}
 	var qdSlice []*queryData
 
 	ask := &queryData{
@@ -62,7 +64,9 @@ func (s *searcher) makeQueryData() []*queryData {
 }
 
 func (s *searcher) makeParseData() []*parseData {
-	s.infoLog.Println("Making slice of parse data...")
+	if s.config.verbose {
+		s.infoLog.Println("Making slice of parse data...")
+	}
 	var pdSlice []*parseData
 
 	ask := &parseData{
@@ -149,6 +153,9 @@ func (s *searcher) makeSearchURLs(qdSlice []*queryData) [6]chan string {
 		close(chans[i])
 	}
 
-	s.infoLog.Println("Search URLs completed.")
+	if s.config.verbose {
+		s.infoLog.Println("Search URLs completed.")
+	}
+
 	return chans
 }

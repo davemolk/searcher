@@ -13,6 +13,7 @@ type config struct {
 	exact       bool
 	file        string
 	timeout     int
+	verbose     bool
 	write       bool
 }
 
@@ -32,6 +33,7 @@ func main() {
 	flag.StringVar(&config.baseSearch, "s", "", "base search (enclose phrases in quotes)")
 	flag.StringVar(&config.file, "f", "", "file name containing additional terms to run with the base search")
 	flag.IntVar(&config.timeout, "t", 5000, "timeout (in ms, default 5000)")
+	flag.BoolVar(&config.verbose, "v", false, "verbose output")
 	flag.BoolVar(&config.write, "w", false, "write results to file")
 
 	flag.Parse()

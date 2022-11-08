@@ -39,7 +39,9 @@ func (s *searcher) getTerms() {
 		}
 		s.terms = terms
 	default:
-		s.errorLog.Println("No additional search terms supplied. Continuing with base search only.")
+		if s.config.verbose {
+			s.errorLog.Println("No additional search terms supplied. Continuing with base search only.")
+		}
 	}
 }
 

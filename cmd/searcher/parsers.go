@@ -43,7 +43,9 @@ func (s *searcher) getAndParseData(pdSlice []*parseData, chans [6]chan string) {
 				urlTerm := strings.Split(u, "GETTERM")
 				str, err := s.makeRequest(urlTerm[0], s.config.timeout)
 				if err != nil {
-					s.errorLog.Printf("error in makeRequest: %v\n", err)
+					if s.config.verbose {
+						s.errorLog.Printf("error in makeRequest: %v\n", err)
+					}
 					<-tokens
 					return
 				}
@@ -57,31 +59,36 @@ func (s *searcher) getAndParseData(pdSlice []*parseData, chans [6]chan string) {
 }
 
 func (s *searcher) parseSearchResults(data, term string, pd *parseData) {
-	s.infoLog.Printf("Parsing %s for %q", pd.name, term)
+	if s.config.verbose {
+		s.infoLog.Printf("Parsing %s for %q", pd.name, term)
+	}
 	localResults := make(map[string]string)
 
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(data))
 	if err != nil {
-		s.errorLog.Printf("goquery error for %s: %v\n", pd.name, err)
+		if s.config.verbose {
+			s.errorLog.Printf("goquery error for %s: %v\n", pd.name, err)
+		}
 		return
 	}
 
 	doc.Find(pd.itemSelector).Each(func(i int, g *goquery.Selection) {
 		// no link, no point in getting blurb
 		if link, ok := g.Find(pd.linkSelector).Attr("href"); !ok {
-			s.errorLog.Printf("unable to get link for %s\n", pd.name)
+			if s.config.verbose {
+				s.errorLog.Printf("unable to get link for %s\n", pd.name)
+			}
 			return
 		} else {
 			cleanLink := s.cleanLinks(link)
 			blurb := g.Find(pd.blurbSelector).Text()
-			if blurb == "" {
+			if blurb == "" && s.config.verbose {
 				s.errorLog.Printf("unable to get blurb for %s\n", pd.name)
 			}
 			cleanBlurb := s.cleanBlurb(blurb)
 			localResults[cleanLink] = cleanBlurb
 			s.searches.store(term, cleanLink, cleanBlurb)
 		}
-
 	})
 }
 
@@ -95,7 +102,9 @@ func (s *searcher) cleanBlurb(str string) string {
 func (s *searcher) cleanLinks(str string) string {
 	u, err := url.QueryUnescape(str)
 	if err != nil {
-		s.errorLog.Printf("unable to clean %s: %v\n", str, err)
+		if s.config.verbose {
+			s.errorLog.Printf("unable to clean %s: %v\n", str, err)
+		}
 		return str
 	}
 	if strings.HasPrefix(u, "//duck") {
