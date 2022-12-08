@@ -11,9 +11,6 @@ import (
 
 // makeParseData returns the selectors for each of the search engines.
 func (s *searcher) makeParseData() []parseData {
-	if s.config.verbose {
-		s.infoLog.Println("Making slice of parse data...")
-	}
 	var pdSlice []parseData
 
 	ask := parseData{
@@ -66,7 +63,7 @@ func (s *searcher) makeParseData() []parseData {
 func (s *searcher) getAndParseData() {
 	pdSlice := s.makeParseData()
 	chans := s.makeSearchURLs()
-	
+
 	var wg sync.WaitGroup
 	tokens := make(chan struct{}, s.config.concurrency)
 	for i, ch := range chans {
@@ -77,16 +74,20 @@ func (s *searcher) getAndParseData() {
 				defer wg.Done()
 				// splits into URL and the search term(s)
 				urlTerm := strings.Split(u, "GETTERM")
-				body, err := s.makeRequest(urlTerm[0], s.config.timeout)
-				if err != nil {
-					if s.config.verbose {
-						s.errorLog.Printf("error in makeRequest: %v\n", err)
-					}
-					<-tokens
-					return
-				}
+
+				_ = pdSlice
+				fmt.Println(urlTerm)
 				<-tokens
-				s.parseSearchResults(body, urlTerm[1], pdSlice[i])
+				// body, err := s.makeRequest(urlTerm[0], s.config.timeout)
+				// if err != nil {
+				// 	if s.config.verbose {
+				// 		s.errorLog.Printf("error in makeRequest: %v\n", err)
+				// 	}
+				// 	<-tokens
+				// 	return
+				// }
+				// <-tokens
+				// s.parseSearchResults(body, urlTerm[1], pdSlice[i])
 			}(u, i)
 		}
 	}
@@ -113,7 +114,7 @@ func (s *searcher) parseSearchResults(data, term string, pd parseData) {
 		link, ok := g.Find(pd.linkSelector).Attr("href")
 		if !ok {
 			return
-		} 
+		}
 		blurb := g.Find(pd.blurbSelector).Text()
 		if blurb == "" && s.config.verbose {
 			s.errorLog.Printf("unable to get blurb for %s\n", pd.name)

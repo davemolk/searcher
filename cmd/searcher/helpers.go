@@ -11,17 +11,11 @@ import (
 	"sync"
 )
 
-// readInput takes in the file name for a list of terms and returns
+// readInput reads terms off stdin and returns
 // a string slice containing those terms.
-func (s *searcher) readInput(name string) ([]string, error) {
+func (s *searcher) readInput() ([]string, error) {
 	var terms []string
-	n, err := os.Open(name)
-	if err != nil {
-		return terms, err
-	}
-	defer n.Close()
-
-	scanner := bufio.NewScanner(n)
+	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		// handle phrases
 		term := strings.Replace(scanner.Text(), " ", "+", -1)
@@ -35,10 +29,10 @@ func (s *searcher) readInput(name string) ([]string, error) {
 // adds the appropriate field to the searcher struct instance.
 func (s *searcher) getTerms() {
 	switch {
-	case s.config.file != "":
-		terms, err := s.readInput(s.config.file)
+	case s.config.file:
+		terms, err := s.readInput()
 		if err != nil {
-			s.errorLog.Fatalf("unable to get terms from file: %v", err)
+			s.errorLog.Fatalf("unable to read terms off stdin: %v", err)
 		}
 		s.terms = terms
 	default:

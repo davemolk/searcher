@@ -11,7 +11,7 @@ type config struct {
 	baseSearch  string
 	concurrency int
 	exact       bool
-	file        string
+	file        bool
 	timeout     int
 	verbose     bool
 	write       bool
@@ -30,7 +30,7 @@ func main() {
 	var config config
 	flag.IntVar(&config.concurrency, "c", 10, "max number of goroutines to use at any given time")
 	flag.BoolVar(&config.exact, "e", false, "search for exact match")
-	flag.StringVar(&config.file, "f", "", "file name containing additional terms to run with the base search")
+	flag.BoolVar(&config.file, "f", false, "check stdin for additional search terms")
 	flag.StringVar(&config.baseSearch, "q", "", "base search query")
 	flag.IntVar(&config.timeout, "t", 5000, "timeout (in ms, default 5000)")
 	flag.BoolVar(&config.verbose, "v", false, "verbose output")
@@ -60,10 +60,9 @@ func main() {
 
 	s.cleanQuery()
 
-	
 	// revisit flow
-	s.getTerms() 
-	
+	s.getTerms()
+
 	// only if writing? otherwise i'm just spitting out to terminal
 	for _, t := range s.terms {
 		searches.searches[t] = make(map[string]string)

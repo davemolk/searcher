@@ -19,38 +19,35 @@ type parseData struct {
 }
 
 func (s *searcher) makeQueryData() []queryData {
-	if s.config.verbose {
-		s.infoLog.Println("Making slice of query data...")
-	}
 	var qdSlice []queryData
 
 	ask := queryData{
-		base:   "https://www.ask.com/web?q=",
+		base:   fmt.Sprintf("%s%s", "https://www.ask.com/web?q=", s.config.baseSearch),
 		spacer: "+",
 	}
 
 	bing := queryData{
-		base:   "https://bing.com/search?q=",
+		base:   fmt.Sprintf("%s%s", "https://bing.com/search?q=", s.config.baseSearch),
 		spacer: "+",
 	}
 
 	brave := queryData{
-		base:   "https://search.brave.com/search?q=",
+		base:   fmt.Sprintf("%s%s", "https://search.brave.com/search?q=", s.config.baseSearch),
 		spacer: "+",
 	}
 
 	duck := queryData{
-		base:   "https://html.duckduckgo.com/html?q=",
+		base:   fmt.Sprintf("%s%s", "https://html.duckduckgo.com/html?q=", s.config.baseSearch),
 		spacer: "+",
 	}
 
 	yahoo := queryData{
-		base:   "https://search.yahoo.com/search?p=",
+		base:   fmt.Sprintf("%s%s", "https://search.yahoo.com/search?p=", s.config.baseSearch),
 		spacer: "+",
 	}
 
 	yandex := queryData{
-		base:   "https://yandex.com/search/?text=",
+		base:   fmt.Sprintf("%s%s", "https://yandex.com/search/?text=", s.config.baseSearch),
 		spacer: "+",
 	}
 	qdSlice = append(qdSlice, ask, bing, brave, duck, yahoo, yandex)
@@ -69,33 +66,42 @@ func (s *searcher) cleanQuery() {
 func (s *searcher) makeSearchURLs() [6]chan string {
 	// each channel will store all the query strings for a given search engine.
 	var chans [6]chan string
-	for i := range chans {
-		chans[i] = make(chan string, len(s.terms))
-	}
-
 	qdSlice := s.makeQueryData()
-
 	var wg sync.WaitGroup
-	for _, term := range s.terms {
+
+	switch {
+	case len(s.terms) == 0:
+		for i := range chans {
+			chans[i] = make(chan string, 1)
+		}
 		for i, qd := range qdSlice {
 			wg.Add(1)
-			go func(qd queryData, term string, i int) {
+			go func(qd queryData, i int) {
 				defer wg.Done()
-				url := fmt.Sprintf("%s%s%s%s", qd.base, s.config.baseSearch, qd.spacer, term)
-				// jenky, lol
-				url = fmt.Sprintf("%sGETTERM%s", url, term)
-				chans[i] <- url
-			}(qd, term, i)
+				chans[i] <- qd.base
+			}(qd, i)
+		}
+	default:
+		for i := range chans {
+			chans[i] = make(chan string, len(s.terms))
+		}
+		for _, term := range s.terms {
+			for i, qd := range qdSlice {
+				wg.Add(1)
+				go func(qd queryData, term string, i int) {
+					defer wg.Done()
+					url := fmt.Sprintf("%s%s%s", qd.base, qd.spacer, term)
+					// jenky, lol
+					url = fmt.Sprintf("%sGETTERM%s", url, term)
+					chans[i] <- url
+				}(qd, term, i)
+			}
 		}
 	}
 
 	wg.Wait()
 	for i := range chans {
 		close(chans[i])
-	}
-
-	if s.config.verbose {
-		s.infoLog.Println("Search URLs created.")
 	}
 
 	return chans
