@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -22,7 +23,9 @@ func (s *searcher) readInput(name string) ([]string, error) {
 
 	scanner := bufio.NewScanner(n)
 	for scanner.Scan() {
-		terms = append(terms, scanner.Text())
+		// handle phrases
+		term := strings.Replace(scanner.Text(), " ", "+", -1)
+		terms = append(terms, term)
 	}
 	return terms, scanner.Err()
 }

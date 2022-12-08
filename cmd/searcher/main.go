@@ -58,17 +58,18 @@ func main() {
 		searches: searches,
 	}
 
-	s.getTerms()
+	s.cleanQuery()
+
+	
+	// revisit flow
+	s.getTerms() 
+	
+	// only if writing? otherwise i'm just spitting out to terminal
 	for _, t := range s.terms {
 		searches.searches[t] = make(map[string]string)
 	}
 
-	qdSlice := s.makeQueryData()
-	pdSlice := s.makeParseData()
-
-	chans := s.makeSearchURLs(qdSlice)
-
-	s.getAndParseData(pdSlice, chans)
+	s.getAndParseData()
 
 	if config.write {
 		wait := s.launchWriters()

@@ -58,83 +58,34 @@ func (s *searcher) makeQueryData() []queryData {
 	return qdSlice
 }
 
-func (s *searcher) makeParseData() []parseData {
-	if s.config.verbose {
-		s.infoLog.Println("Making slice of parse data...")
-	}
-	var pdSlice []parseData
-
-	ask := parseData{
-		blurbSelector: "div.PartialSearchResults-item p",
-		itemSelector:  "div.PartialSearchResults-item",
-		linkSelector:  "a.PartialSearchResults-item-title-link",
-		name:          "ask",
-	}
-
-	bing := parseData{
-		blurbSelector: "div.b_caption p",
-		itemSelector:  "li.b_algo",
-		linkSelector:  "h2 a",
-		name:          "bing",
-	}
-
-	brave := parseData{
-		blurbSelector: "div.snippet-content p.snippet-description",
-		itemSelector:  "div.fdb",
-		linkSelector:  "div.fdb > a.result-header",
-		name:          "brave",
-	}
-
-	duck := parseData{
-		blurbSelector: "div.links_main > a",
-		itemSelector:  "div.web-result",
-		linkSelector:  "div.links_main > a",
-		name:          "duck",
-	}
-
-	yahoo := parseData{
-		blurbSelector: "div.compText",
-		itemSelector:  "div.algo",
-		linkSelector:  "h3 > a",
-		name:          "yahoo",
-	}
-
-	yandex := parseData{
-		blurbSelector: "div.TextContainer",
-		itemSelector:  "li.serp-item",
-		linkSelector:  "div.VanillaReact > a",
-		name:          "yandex",
-	}
-	pdSlice = append(pdSlice, ask, bing, brave, duck, yahoo, yandex)
-
-	return pdSlice
-}
-
-func (s *searcher) makeQueryString(wg *sync.WaitGroup, data queryData, term string, ch chan string) {
-	defer wg.Done()
-	cleanQ := strings.Replace(s.config.baseSearch, " ", data.spacer, -1)
-	var url string
+func (s *searcher) cleanQuery() {
+	// handle multiple words
+	s.config.baseSearch = strings.Replace(s.config.baseSearch, " ", "+", -1)
 	if s.config.exact {
-		url = fmt.Sprintf("%s\"%s%s%s\"", data.base, cleanQ, data.spacer, term)
-	} else {
-		url = fmt.Sprintf("%s%s%s%s", data.base, cleanQ, data.spacer, term)
+		s.config.baseSearch = fmt.Sprintf("\"%s\"", s.config.baseSearch)
 	}
-	// jenky, lol
-	url = fmt.Sprintf("%sGETTERM%s", url, term)
-	ch <- url
 }
 
-func (s *searcher) makeSearchURLs(qdSlice []queryData) [6]chan string {
+func (s *searcher) makeSearchURLs() [6]chan string {
+	// each channel will store all the query strings for a given search engine.
 	var chans [6]chan string
 	for i := range chans {
 		chans[i] = make(chan string, len(s.terms))
 	}
 
+	qdSlice := s.makeQueryData()
+
 	var wg sync.WaitGroup
 	for _, term := range s.terms {
 		for i, qd := range qdSlice {
 			wg.Add(1)
-			go s.makeQueryString(&wg, qd, term, chans[i])
+			go func(qd queryData, term string, i int) {
+				defer wg.Done()
+				url := fmt.Sprintf("%s%s%s%s", qd.base, s.config.baseSearch, qd.spacer, term)
+				// jenky, lol
+				url = fmt.Sprintf("%sGETTERM%s", url, term)
+				chans[i] <- url
+			}(qd, term, i)
 		}
 	}
 
@@ -144,7 +95,7 @@ func (s *searcher) makeSearchURLs(qdSlice []queryData) [6]chan string {
 	}
 
 	if s.config.verbose {
-		s.infoLog.Println("Search URLs completed.")
+		s.infoLog.Println("Search URLs created.")
 	}
 
 	return chans
