@@ -31,7 +31,7 @@ func (s *searchesMap) store(term, url, blurb string) {
 	s.searches[term][url] = blurb
 }
 
-func (s *searcher) getAndParseData(pdSlice []*parseData, chans [6]chan string) {
+func (s *searcher) getAndParseData(pdSlice []parseData, chans [6]chan string) {
 	var wg sync.WaitGroup
 	tokens := make(chan struct{}, s.config.concurrency)
 	for i, ch := range chans {
@@ -58,7 +58,7 @@ func (s *searcher) getAndParseData(pdSlice []*parseData, chans [6]chan string) {
 	wg.Wait()
 }
 
-func (s *searcher) parseSearchResults(data, term string, pd *parseData) {
+func (s *searcher) parseSearchResults(data, term string, pd parseData) {
 	if s.config.verbose {
 		s.infoLog.Printf("Parsing %s for %q", pd.name, term)
 	}

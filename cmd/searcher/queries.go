@@ -18,109 +18,99 @@ type parseData struct {
 	name          string
 }
 
-func (s *searcher) makeQueryData() []*queryData {
+func (s *searcher) makeQueryData() []queryData {
 	if s.config.verbose {
 		s.infoLog.Println("Making slice of query data...")
 	}
-	var qdSlice []*queryData
+	var qdSlice []queryData
 
-	ask := &queryData{
+	ask := queryData{
 		base:   "https://www.ask.com/web?q=",
-		spacer: "%20",
+		spacer: "+",
 	}
-	qdSlice = append(qdSlice, ask)
 
-	bing := &queryData{
+	bing := queryData{
 		base:   "https://bing.com/search?q=",
-		spacer: "%20",
+		spacer: "+",
 	}
-	qdSlice = append(qdSlice, bing)
 
-	brave := &queryData{
+	brave := queryData{
 		base:   "https://search.brave.com/search?q=",
 		spacer: "+",
 	}
-	qdSlice = append(qdSlice, brave)
 
-	duck := &queryData{
+	duck := queryData{
 		base:   "https://html.duckduckgo.com/html?q=",
 		spacer: "+",
 	}
-	qdSlice = append(qdSlice, duck)
 
-	yahoo := &queryData{
+	yahoo := queryData{
 		base:   "https://search.yahoo.com/search?p=",
 		spacer: "+",
 	}
-	qdSlice = append(qdSlice, yahoo)
 
-	yandex := &queryData{
+	yandex := queryData{
 		base:   "https://yandex.com/search/?text=",
 		spacer: "+",
 	}
-	qdSlice = append(qdSlice, yandex)
+	qdSlice = append(qdSlice, ask, bing, brave, duck, yahoo, yandex)
 
 	return qdSlice
 }
 
-func (s *searcher) makeParseData() []*parseData {
+func (s *searcher) makeParseData() []parseData {
 	if s.config.verbose {
 		s.infoLog.Println("Making slice of parse data...")
 	}
-	var pdSlice []*parseData
+	var pdSlice []parseData
 
-	ask := &parseData{
+	ask := parseData{
 		blurbSelector: "div.PartialSearchResults-item p",
 		itemSelector:  "div.PartialSearchResults-item",
 		linkSelector:  "a.PartialSearchResults-item-title-link",
 		name:          "ask",
 	}
-	pdSlice = append(pdSlice, ask)
 
-	bing := &parseData{
+	bing := parseData{
 		blurbSelector: "div.b_caption p",
 		itemSelector:  "li.b_algo",
 		linkSelector:  "h2 a",
 		name:          "bing",
 	}
-	pdSlice = append(pdSlice, bing)
 
-	brave := &parseData{
+	brave := parseData{
 		blurbSelector: "div.snippet-content p.snippet-description",
 		itemSelector:  "div.fdb",
 		linkSelector:  "div.fdb > a.result-header",
 		name:          "brave",
 	}
-	pdSlice = append(pdSlice, brave)
 
-	duck := &parseData{
+	duck := parseData{
 		blurbSelector: "div.links_main > a",
 		itemSelector:  "div.web-result",
 		linkSelector:  "div.links_main > a",
 		name:          "duck",
 	}
-	pdSlice = append(pdSlice, duck)
 
-	yahoo := &parseData{
+	yahoo := parseData{
 		blurbSelector: "div.compText",
 		itemSelector:  "div.algo",
 		linkSelector:  "h3 > a",
 		name:          "yahoo",
 	}
-	pdSlice = append(pdSlice, yahoo)
 
-	yandex := &parseData{
+	yandex := parseData{
 		blurbSelector: "div.TextContainer",
 		itemSelector:  "li.serp-item",
 		linkSelector:  "div.VanillaReact > a",
 		name:          "yandex",
 	}
-	pdSlice = append(pdSlice, yandex)
+	pdSlice = append(pdSlice, ask, bing, brave, duck, yahoo, yandex)
 
 	return pdSlice
 }
 
-func (s *searcher) makeQueryString(wg *sync.WaitGroup, data *queryData, term string, ch chan string) {
+func (s *searcher) makeQueryString(wg *sync.WaitGroup, data queryData, term string, ch chan string) {
 	defer wg.Done()
 	cleanQ := strings.Replace(s.config.baseSearch, " ", data.spacer, -1)
 	var url string
@@ -134,7 +124,7 @@ func (s *searcher) makeQueryString(wg *sync.WaitGroup, data *queryData, term str
 	ch <- url
 }
 
-func (s *searcher) makeSearchURLs(qdSlice []*queryData) [6]chan string {
+func (s *searcher) makeSearchURLs(qdSlice []queryData) [6]chan string {
 	var chans [6]chan string
 	for i := range chans {
 		chans[i] = make(chan string, len(s.terms))
