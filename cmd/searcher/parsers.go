@@ -112,10 +112,11 @@ func (s *searcher) parseSearchResults(data, term string, pd parseData) {
 		blurb := g.Find(pd.blurbSelector).Text()
 		cleanedLink := s.cleanLinks(link)
 		cleanedBlurb := s.cleanBlurb(blurb)
-		fmt.Println(cleanedBlurb)
-		fmt.Println()
+		s.output(cleanedBlurb)
 		if term != "" {
 			s.searches.store(term, cleanedLink, cleanedBlurb)
+		} else {
+			s.searches.storeSearch(cleanedLink, cleanedBlurb)
 		}
 	})
 }
@@ -150,4 +151,12 @@ func (s *searcher) cleanLinks(str string) string {
 		u = removeSuffix[0]
 	}
 	return u
+}
+
+func (s *searcher) output(blurb string) {
+	if len(blurb) > 200 {
+		blurb = blurb[:200]
+	}
+	fmt.Println(blurb)
+	fmt.Println()
 }
