@@ -112,7 +112,9 @@ func (s *searcher) parseSearchResults(data, term string, pd parseData) {
 		blurb := g.Find(pd.blurbSelector).Text()
 		cleanedLink := s.cleanLinks(link)
 		cleanedBlurb := s.cleanBlurb(blurb)
-		s.output(cleanedBlurb)
+		if !s.config.json {
+			s.output(cleanedBlurb)
+		}
 		if term != "" {
 			s.searches.store(term, cleanedLink, cleanedBlurb)
 		} else {
