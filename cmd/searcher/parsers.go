@@ -74,20 +74,19 @@ func (s *searcher) getAndParseData() {
 				defer wg.Done()
 				// splits into URL and the search term(s)
 				urlTerm := strings.Split(u, "GETTERM")
-
-				_ = pdSlice
-				fmt.Println(urlTerm)
+				if len(urlTerm) == 1 {
+					urlTerm = append(urlTerm, "")
+				}
+				body, err := s.makeRequest(urlTerm[0], s.config.timeout)
+				if err != nil {
+					if s.config.verbose {
+						s.errorLog.Printf("error in makeRequest: %v\n", err)
+					}
+					<-tokens
+					return
+				}
 				<-tokens
-				// body, err := s.makeRequest(urlTerm[0], s.config.timeout)
-				// if err != nil {
-				// 	if s.config.verbose {
-				// 		s.errorLog.Printf("error in makeRequest: %v\n", err)
-				// 	}
-				// 	<-tokens
-				// 	return
-				// }
-				// <-tokens
-				// s.parseSearchResults(body, urlTerm[1], pdSlice[i])
+				s.parseSearchResults(body, urlTerm[1], pdSlice[i])
 			}(u, i)
 		}
 	}
@@ -96,11 +95,6 @@ func (s *searcher) getAndParseData() {
 }
 
 func (s *searcher) parseSearchResults(data, term string, pd parseData) {
-	if s.config.verbose {
-		s.infoLog.Printf("Parsing %s for %q", pd.name, term)
-	}
-	localResults := make(map[string]string)
-
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(data))
 	if err != nil {
 		if s.config.verbose {
@@ -116,15 +110,13 @@ func (s *searcher) parseSearchResults(data, term string, pd parseData) {
 			return
 		}
 		blurb := g.Find(pd.blurbSelector).Text()
-		if blurb == "" && s.config.verbose {
-			s.errorLog.Printf("unable to get blurb for %s\n", pd.name)
-		}
 		cleanedLink := s.cleanLinks(link)
 		cleanedBlurb := s.cleanBlurb(blurb)
 		fmt.Println(cleanedBlurb)
 		fmt.Println()
-		localResults[cleanedLink] = cleanedBlurb
-		s.searches.store(term, cleanedLink, cleanedBlurb)
+		if term != "" {
+			s.searches.store(term, cleanedLink, cleanedBlurb)
+		}
 	})
 }
 

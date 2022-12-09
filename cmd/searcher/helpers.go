@@ -24,12 +24,9 @@ func (s *searcher) readInput() ([]string, error) {
 	return terms, scanner.Err()
 }
 
-// getTerms looks at the user flag input, determines whether a single
-// term or a file name for a list of terms has been selected, and
-// adds the appropriate field to the searcher struct instance.
 func (s *searcher) getTerms() {
 	switch {
-	case s.config.file:
+	case s.config.terms:
 		terms, err := s.readInput()
 		if err != nil {
 			s.errorLog.Fatalf("unable to read terms off stdin: %v", err)
