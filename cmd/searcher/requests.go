@@ -21,7 +21,7 @@ func (s *searcher) makeRequest(url string, timeout int) (*bytes.Buffer, error) {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to create request for %s: %v", url, err)
 	}
 
 	uAgent := s.randomUA()
@@ -29,7 +29,7 @@ func (s *searcher) makeRequest(url string, timeout int) (*bytes.Buffer, error) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to make request for %s: %v", url, err)
 	}
 
 	defer resp.Body.Close()

@@ -20,7 +20,7 @@ func (s *searcher) getTerms() {
 		s.terms = terms
 	default:
 		if s.config.verbose {
-			s.errorLog.Println("No additional search terms supplied. Continuing with base search only.")
+			s.errorLog.Println("no additional search terms supplied...continuing with base search only.")
 		}
 	}
 }
@@ -52,15 +52,14 @@ func (s *searcher) dump() {
 	case len(s.searches.search) > 0:
 		b, err := s.encode(s.searches.search)
 		if err != nil {
-			s.errorLog.Printf("unable to encode map to json: %v\n", err)
+			s.errorLog.Printf("unable to encode search map to json: %v\n", err)
 			return
 		}
 		if s.config.json {
 			fmt.Println(string(b))
 		}
 		if s.config.write {
-			err := os.WriteFile("data/search.json", b, 0644)
-			if err != nil {
+			if err := os.WriteFile("data/search.json", b, 0644); err != nil {
 				s.errorLog.Printf("write error: %v\n", err)
 			}
 		}
@@ -73,14 +72,13 @@ func (s *searcher) dump() {
 				defer wg.Done()
 				b, err := s.encode(s.searches.searches[t])
 				if err != nil {
-					s.errorLog.Println("unable to encode map to json", err)
+					s.errorLog.Printf("unable to encode searches map to json: %v\n", err)
 					return
 				}
 				results <- string(b)
 				if s.config.write {
 					name := fmt.Sprintf("data/%s.json", t)
-					err := os.WriteFile(name, b, 0644)
-					if err != nil {
+					if err := os.WriteFile(name, b, 0644); err != nil {
 						s.errorLog.Printf("write error: %v\n", err)
 					}
 				}

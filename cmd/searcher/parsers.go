@@ -76,18 +76,18 @@ func (s *searcher) getAndParseData() {
 				// splits into URL and the search term(s)
 				urlTerm := strings.Split(u, "GETTERM")
 				if len(urlTerm) == 1 {
-					urlTerm = append(urlTerm, "")
+					urlTerm = append(urlTerm, "") // this will get stripped later
 				}
-				body, err := s.makeRequest(urlTerm[0], s.config.timeout)
+				buf, err := s.makeRequest(urlTerm[0], s.config.timeout)
 				if err != nil {
 					if s.config.verbose {
-						s.errorLog.Printf("error in makeRequest: %v\n", err)
+						s.errorLog.Printf("error in makeRequest for %s: %v\n", urlTerm[0], err)
 					}
 					<-tokens
 					return
 				}
 				<-tokens
-				s.parseSearchResults(body, urlTerm[1], pdSlice[i])
+				s.parseSearchResults(buf, urlTerm[1], pdSlice[i])
 			}(u, i)
 		}
 	}
