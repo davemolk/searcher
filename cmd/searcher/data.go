@@ -11,6 +11,7 @@ type searchMap struct {
 	searches map[string]map[string]string
 }
 
+// newSearchMap 
 func newSearchMap() *searchMap {
 	return &searchMap{
 		searches: make(map[string]map[string]string),
@@ -18,7 +19,7 @@ func newSearchMap() *searchMap {
 	}
 }
 
-func (s *searchMap) store(term, url, blurb string) {
+func (s *searchMap) storeSearches(term, url, blurb string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.searches[term][url]; !ok {

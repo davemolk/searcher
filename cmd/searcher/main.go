@@ -31,13 +31,17 @@ func main() {
 	flag.StringVar(&config.baseSearch, "q", "", "base search query")
 	flag.IntVar(&config.concurrency, "c", 10, "max number of goroutines to use at any given time")
 	flag.BoolVar(&config.exact, "e", false, "search for exact match")
-	flag.BoolVar(&config.json, "json", false, "print results as json")
-	flag.BoolVar(&config.terms, "terms", false, "check stdin for additional search terms")
-	flag.IntVar(&config.timeout, "t", 5000, "timeout (in ms, default 5000)")
+	flag.BoolVar(&config.json, "j", false, "print results as json")
+	flag.BoolVar(&config.terms, "t", false, "check stdin for additional search terms")
+	flag.IntVar(&config.timeout, "to", 5000, "timeout (in ms, default 5000)")
 	flag.BoolVar(&config.verbose, "v", false, "verbose output")
 	flag.BoolVar(&config.write, "w", false, "write results to file")
 	flag.Parse()
 
+	if config.baseSearch == "" {
+		log.Fatal("must provide a base search query")
+	}
+	
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ltime|log.Lshortfile)
 
 	searches := newSearchMap()

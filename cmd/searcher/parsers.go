@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/url"
 	"strings"
@@ -9,7 +10,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// makeParseData returns the selectors for each of the search engines.
+// makeParseData returns a struct of selectors for each of the search engines.
 func (s *searcher) makeParseData() []parseData {
 	var pdSlice []parseData
 
@@ -94,8 +95,8 @@ func (s *searcher) getAndParseData() {
 	wg.Wait()
 }
 
-func (s *searcher) parseSearchResults(data, term string, pd parseData) {
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(data))
+func (s *searcher) parseSearchResults(data *bytes.Buffer, term string, pd parseData) {
+	doc, err := goquery.NewDocumentFromReader(data)
 	if err != nil {
 		if s.config.verbose {
 			s.errorLog.Printf("goquery error for %s: %v\n", pd.name, err)
@@ -116,7 +117,7 @@ func (s *searcher) parseSearchResults(data, term string, pd parseData) {
 			s.output(cleanedBlurb)
 		}
 		if term != "" {
-			s.searches.store(term, cleanedLink, cleanedBlurb)
+			s.searches.storeSearches(term, cleanedLink, cleanedBlurb)
 		} else {
 			s.searches.storeSearch(cleanedLink, cleanedBlurb)
 		}

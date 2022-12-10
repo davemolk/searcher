@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -9,13 +10,18 @@ import (
 	"time"
 )
 
-func (s *searcher) makeRequest(url string, timeout int) (string, error) {
+// seed random number generator to get random user agents
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func (s *searcher) makeRequest(url string, timeout int) (*bytes.Buffer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Millisecond)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	uAgent := s.randomUA()
@@ -23,28 +29,28 @@ func (s *searcher) makeRequest(url string, timeout int) (string, error) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("HTTP response: %d for %s", resp.StatusCode, url)
+		return nil, fmt.Errorf("HTTP response: %d for %s", resp.StatusCode, url)
 	}
 
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("unable to read body for %s: %v", url, err)
 	}
+	buf := bytes.NewBuffer(b)
 
-	return string(b), nil
+	return buf, nil
 }
 
 // randomUA picks a random user agent from the slice and returns it.
 func (s *searcher) randomUA() string {
 	userAgents := s.getUA()
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	random := r.Intn(len(userAgents))
+	random := rand.Intn(len(userAgents))
 	return userAgents[random]
 }
 
