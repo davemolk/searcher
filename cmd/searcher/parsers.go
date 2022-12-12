@@ -10,7 +10,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// makeParseData returns a struct of selectors for each of the search engines.
+// makeParseData returns a struct of selectors for each of the
+// search engines (ask, bing, brave, duck duck go, yahoo, and yandex).
 func (s *searcher) makeParseData() []parseData {
 	var pdSlice []parseData
 
@@ -61,6 +62,9 @@ func (s *searcher) makeParseData() []parseData {
 	return pdSlice
 }
 
+// getAndParseData creates query strings for each search engine,
+// makes the appropriate GET request, and parses the results,
+// saving each URL and associated blurb.
 func (s *searcher) getAndParseData() {
 	pdSlice := s.makeParseData()
 	chans := s.makeSearchURLs()
@@ -95,6 +99,8 @@ func (s *searcher) getAndParseData() {
 	wg.Wait()
 }
 
+// parseSearchResults parses the response body for each search result,
+// saving the URL and associated blurb.
 func (s *searcher) parseSearchResults(data *bytes.Buffer, term string, pd parseData) {
 	doc, err := goquery.NewDocumentFromReader(data)
 	if err != nil {
@@ -114,7 +120,7 @@ func (s *searcher) parseSearchResults(data *bytes.Buffer, term string, pd parseD
 		cleanedLink := s.cleanLinks(link)
 		cleanedBlurb := s.cleanBlurb(blurb)
 		if !s.config.json {
-			s.output(cleanedBlurb)
+			s.printStdout(cleanedBlurb)
 		}
 		if term != "" {
 			s.searches.storeSearches(term, cleanedLink, cleanedBlurb)
@@ -124,6 +130,7 @@ func (s *searcher) parseSearchResults(data *bytes.Buffer, term string, pd parseD
 	})
 }
 
+// cleanBlurb does a bit of tidying up of each input blurb string.
 func (s *searcher) cleanBlurb(str string) string {
 	cleanB := s.noBlank.ReplaceAllString(str, " ")
 	cleanB = strings.TrimSpace(cleanB)
@@ -131,6 +138,9 @@ func (s *searcher) cleanBlurb(str string) string {
 	return cleanB
 }
 
+// cleanLinks does a bit of tidying up of each input URL string.
+// bing will sometimes encode the links and I haven't bothered to work
+// out how to decode them. Maybe one day...
 func (s *searcher) cleanLinks(str string) string {
 	u, err := url.QueryUnescape(str)
 	if err != nil {
@@ -156,7 +166,9 @@ func (s *searcher) cleanLinks(str string) string {
 	return u
 }
 
-func (s *searcher) output(blurb string) {
+// printStdout truncates any blurb with a length longer
+// than 200 and prints to stdout.
+func (s *searcher) printStdout(blurb string) {
 	if len(blurb) > 200 {
 		blurb = blurb[:200]
 	}

@@ -6,11 +6,15 @@ import (
 	"sync"
 )
 
+// queryData is a struct containing the base URL
+// and spacer to be used in constructing query strings.
 type queryData struct {
 	base   string
 	spacer string
 }
 
+// parseData is a struct containing information on
+// parsing search engine results for each URL and blurb.
 type parseData struct {
 	blurbSelector string
 	itemSelector  string
@@ -18,6 +22,9 @@ type parseData struct {
 	name          string
 }
 
+// makeQueryData returns a slice of queryData featuring
+// one instance for each search engine (ask, bing, brave,
+// duck duck go, yahoo, and yandex).
 func (s *searcher) makeQueryData() []queryData {
 	var qdSlice []queryData
 
@@ -55,6 +62,8 @@ func (s *searcher) makeQueryData() []queryData {
 	return qdSlice
 }
 
+// cleanQuery replaces any spaces with "+" and adds double quotes when
+// the exact flag is invoked on the command line.
 func (s *searcher) cleanQuery() {
 	// handle multiple words
 	s.config.baseSearch = strings.Replace(s.config.baseSearch, " ", "+", -1)
@@ -63,8 +72,9 @@ func (s *searcher) cleanQuery() {
 	}
 }
 
+// makeSearchURLs returns an array of 6 string channels, each containing all
+// the query strings for a given search engine.
 func (s *searcher) makeSearchURLs() [6]chan string {
-	// each channel will store all the query strings for a given search engine.
 	var chans [6]chan string
 	qdSlice := s.makeQueryData()
 	var wg sync.WaitGroup

@@ -3,9 +3,9 @@ package main
 import "sync"
 
 // searchMap contains two maps, search and searches. The first is
-// used when a single query is entered (format URL:blurb), while
-// the second is used in situations where the -terms flag is true
-// (format term:URL:blurb).
+// used when a single query is entered (map formatted as URL:blurb),
+// while the second is used when the -terms flag is true
+// (formatted as a map of maps, with term:URL:blurb).
 type searchMap struct {
 	mu       sync.Mutex
 	search   map[string]string
@@ -20,9 +20,9 @@ func newSearchMap() *searchMap {
 	}
 }
 
-// storeSearches checks if a URL has already been stored for
-// a given search term. If it hasn't, storeSearches will 
-// store the URL and blurb and associate them with the search term.
+// Given search term, storeSearches checks if a URL has already
+// been stored. If it hasn't, the URL and blurb will be
+// stored as a map value for the term.
 func (s *searchMap) storeSearches(term, url, blurb string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -31,9 +31,8 @@ func (s *searchMap) storeSearches(term, url, blurb string) {
 	}
 }
 
-// storeSearch accepts a URL and associated blurb, checks whether
-// or not the URL is already present in the map. and stores the
-// data if not.
+// storeSearch checks if a URL has already been stored. If it hasn't,
+// both the URL and the associated blurb will be stored.
 func (s *searchMap) storeSearch(url, blurb string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

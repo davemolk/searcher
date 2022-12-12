@@ -15,6 +15,8 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+// makeRequest takes in a URL and a timeout, makes a GET request, and returns
+// the results as a *bytes.Buffer (along with any errors).
 func (s *searcher) makeRequest(url string, timeout int) (*bytes.Buffer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Millisecond)
 	defer cancel()

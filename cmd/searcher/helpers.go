@@ -10,24 +10,9 @@ import (
 	"sync"
 )
 
+// getTerms reads terms off stdin and sets the value
+// of s.terms to the resulting slice.
 func (s *searcher) getTerms() {
-	switch {
-	case s.config.terms:
-		terms, err := s.readInput()
-		if err != nil {
-			s.errorLog.Fatalf("unable to read terms off stdin: %v", err)
-		}
-		s.terms = terms
-	default:
-		if s.config.verbose {
-			s.errorLog.Println("no additional search terms supplied...continuing with base search only.")
-		}
-	}
-}
-
-// readInput reads terms off stdin and returns
-// a string slice containing those terms.
-func (s *searcher) readInput() ([]string, error) {
 	var terms []string
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -35,9 +20,15 @@ func (s *searcher) readInput() ([]string, error) {
 		term := strings.Replace(scanner.Text(), " ", "+", -1)
 		terms = append(terms, term)
 	}
-	return terms, scanner.Err()
+	if scanner.Err() != nil {
+		s.errorLog.Printf("problem reading terms off stdin: %v\n", scanner.Err())
+		return
+	}
+	s.terms = terms
 }
 
+// encode takes in a map, encodes it to json, and returns
+// a byte slice and any errors.
 func (s *searcher) encode(data map[string]string) ([]byte, error) {
 	buf := &bytes.Buffer{}
 	encoder := json.NewEncoder(buf)
@@ -47,7 +38,9 @@ func (s *searcher) encode(data map[string]string) ([]byte, error) {
 	return bytes.TrimRight(buf.Bytes(), "\n"), err
 }
 
-func (s *searcher) dump() {
+// processResults encodes the search results and either prints
+// them as json to stdout or writes them to a file (or both).
+func (s *searcher) processResults() {
 	switch {
 	case len(s.searches.search) > 0:
 		b, err := s.encode(s.searches.search)

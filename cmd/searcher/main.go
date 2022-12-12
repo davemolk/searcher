@@ -41,9 +41,8 @@ func main() {
 	if config.baseSearch == "" {
 		log.Fatal("must provide a base search query")
 	}
-	
-	errorLog := log.New(os.Stderr, "ERROR\t", log.Ltime|log.Lshortfile)
 
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ltime|log.Lshortfile)
 	searches := newSearchMap()
 	noBlank := regexp.MustCompile(`\s{2,}`)
 
@@ -61,9 +60,9 @@ func main() {
 	}
 
 	s.cleanQuery()
-	s.getTerms()
 
 	if config.terms {
+		s.getTerms()
 		for _, t := range s.terms {
 			s.searches.searches[t] = make(map[string]string)
 		}
@@ -72,6 +71,6 @@ func main() {
 	s.getAndParseData()
 
 	if config.json || config.write {
-		s.dump()
+		s.processResults()
 	}
 }
