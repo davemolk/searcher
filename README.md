@@ -56,7 +56,7 @@ where each file contains the JSON object (URL:blurb) for that particular term.
 First, you'll need to [install go](https://golang.org/doc/install). Then, run the following command:
 
 ```
-go install github.com/davemolk/searcher@latest
+go install github.com/davemolk/searcher/cmd/searcher@latest
 ```
 
 ## Flags
