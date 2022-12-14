@@ -61,7 +61,7 @@ go install github.com/davemolk/searcher/cmd/searcher@latest
 
 ## Flags
 ```
-Usage of urlbits:
+Usage of searcher:
   -c int
     	Max number of goroutines to use at any given time.
   -e bool
