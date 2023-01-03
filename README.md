@@ -70,6 +70,8 @@ Usage of searcher:
     	Print results as JSON.
   -q string
     	Base search query.
+  -os string
+    	operating system (used in user agent and header creation)
   -t bool
     	Check Stdin for additional search terms.
   -to int
@@ -79,3 +81,6 @@ Usage of searcher:
   -w bool
     	Write results to file.
 ```
+
+## Note
+Each request gets a randomly assigned user agent corresponding to your os as well as appropriate headers (50/50 chance of chrome or firefox). Go unfortunately doesn't preserve header order, so if that's important to you and what you're up to, you'll have to look elsewhere.

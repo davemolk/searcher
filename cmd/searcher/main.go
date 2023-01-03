@@ -12,6 +12,7 @@ type config struct {
 	concurrency int
 	exact       bool
 	json        bool
+	os          string
 	terms       bool
 	timeout     int
 	verbose     bool
@@ -32,6 +33,7 @@ func main() {
 	flag.IntVar(&config.concurrency, "c", 10, "max number of goroutines to use at any given time")
 	flag.BoolVar(&config.exact, "e", false, "search for exact match")
 	flag.BoolVar(&config.json, "j", false, "print results as json")
+	flag.StringVar(&config.os, "os", "w", "operating system (w or m)")
 	flag.BoolVar(&config.terms, "t", false, "check stdin for additional search terms")
 	flag.IntVar(&config.timeout, "to", 5000, "timeout (in ms, default 5000)")
 	flag.BoolVar(&config.verbose, "v", false, "verbose output")
