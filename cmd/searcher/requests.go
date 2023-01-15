@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"fmt"
 	"io"
@@ -39,10 +40,16 @@ func (s *searcher) makeRequest(url string, timeout int) (*bytes.Buffer, error) {
 		return nil, fmt.Errorf("HTTP response: %d for %s", resp.StatusCode, url)
 	}
 
-	b, err := io.ReadAll(resp.Body)
+	g, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode gzip for %s: %w", url, err)
+	}
+
+	b, err := io.ReadAll(g)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read body for %s: %v", url, err)
 	}
+
 	buf := bytes.NewBuffer(b)
 
 	return buf, nil
@@ -61,7 +68,7 @@ func (s *searcher) ff(r *http.Request) *http.Request {
 	r.Header.Set("User-Agent", uAgent)
 	r.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
 	r.Header.Set("Accept-Language", "en-US,en;q=0.5")
-	r.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	r.Header.Set("Accept-Encoding", "gzip")
 	r.Header.Set("DNT", "1")
 	r.Header.Set("Connection", "keep-alive")
 	r.Header.Set("Upgrade-Insecure-Requests", "1")
@@ -93,7 +100,7 @@ func (s *searcher) chrome(r *http.Request) *http.Request {
 	r.Header.Set("Sec-Fetch-Mode", "navigate")
 	r.Header.Set("Sec-Fetch-User", "?1")
 	r.Header.Set("Sec-Fetch-Dest", "document")
-	r.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	r.Header.Set("Accept-Encoding", "gzip")
 	r.Header.Set("Accept-Language", "en-US,en;q=0.5")
 	return r
 }
