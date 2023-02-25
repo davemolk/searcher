@@ -24,7 +24,7 @@ type parseData struct {
 
 // makeQueryData returns a slice of queryData featuring
 // one instance for each search engine (ask, bing, brave,
-// duck duck go, yahoo, and yandex).
+// duck duck go, and yahoo).
 func (s *searcher) makeQueryData() []queryData {
 	var qdSlice []queryData
 
@@ -53,11 +53,7 @@ func (s *searcher) makeQueryData() []queryData {
 		spacer: "+",
 	}
 
-	yandex := queryData{
-		base:   fmt.Sprintf("%s%s", "https://yandex.com/search/?text=", s.config.baseSearch),
-		spacer: "+",
-	}
-	qdSlice = append(qdSlice, ask, bing, brave, duck, yahoo, yandex)
+	qdSlice = append(qdSlice, ask, bing, brave, duck, yahoo)
 
 	return qdSlice
 }
@@ -72,10 +68,10 @@ func (s *searcher) cleanQuery() {
 	}
 }
 
-// makeSearchURLs returns an array of 6 string channels, each containing all
+// makeSearchURLs returns an array of 5 string channels, each containing all
 // the query strings for a given search engine.
-func (s *searcher) makeSearchURLs() [6]chan string {
-	var chans [6]chan string
+func (s *searcher) makeSearchURLs() [5]chan string {
+	var chans [5]chan string
 	qdSlice := s.makeQueryData()
 	var wg sync.WaitGroup
 

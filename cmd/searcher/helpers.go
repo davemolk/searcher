@@ -21,7 +21,7 @@ func (s *searcher) getTerms() {
 		terms = append(terms, term)
 	}
 	if scanner.Err() != nil {
-		s.errorLog.Printf("problem reading terms off stdin: %v\n", scanner.Err())
+		s.errorLog.Fatal("problem reading terms off stdin: ", scanner.Err())
 		return
 	}
 	s.terms = terms

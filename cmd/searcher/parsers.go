@@ -11,7 +11,7 @@ import (
 )
 
 // makeParseData returns a struct of selectors for each of the
-// search engines (ask, bing, brave, duck duck go, yahoo, and yandex).
+// search engines (ask, bing, brave, duck duck go, and yahoo).
 func (s *searcher) makeParseData() []parseData {
 	var pdSlice []parseData
 
@@ -50,14 +50,7 @@ func (s *searcher) makeParseData() []parseData {
 		name:          "yahoo",
 	}
 
-	yandex := parseData{
-		blurbSelector: "div.TextContainer",
-		itemSelector:  "li.serp-item",
-		linkSelector:  "div.VanillaReact > a",
-		name:          "yandex",
-	}
-
-	pdSlice = append(pdSlice, ask, bing, brave, duck, yahoo, yandex)
+	pdSlice = append(pdSlice, ask, bing, brave, duck, yahoo)
 
 	return pdSlice
 }

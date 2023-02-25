@@ -1,6 +1,5 @@
 # searcher
-
-Run a base query (plus optional add-ons) through ask, bing, brave, duck duck go, yahoo, and yandex.
+Run a base query (plus optional add-ons) through ask, bing, brave, duck duck go, and yahoo.
 
 ## Overview
 By default, this tool collects the URLs and result blurbs and prints them to stdout. You can pipe in additional terms that will be added to the base query. Print the results as json if you'd like, or save them to json files.
@@ -38,10 +37,6 @@ https://search.yahoo.com/search?p=golang+cloud
 https://search.yahoo.com/search?p=golang+cli
 https://search.yahoo.com/search?p=golang+mascot
 https://search.yahoo.com/search?p=golang+microservices
-https://yandex.com/search/?text=golang+cli
-https://yandex.com/search/?text=golang+cloud
-https://yandex.com/search/?text=golang+mascot
-https://yandex.com/search/?text=golang+microservices
 ```
 the results are printed as JSON to the stdout and saved in the following files:
 ```
