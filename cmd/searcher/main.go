@@ -15,6 +15,7 @@ type config struct {
 	os          string
 	terms       bool
 	timeout     int
+	urls        bool
 	verbose     bool
 	write       bool
 }
@@ -31,11 +32,12 @@ func main() {
 	var config config
 	flag.StringVar(&config.baseSearch, "q", "", "base search query")
 	flag.IntVar(&config.concurrency, "c", 10, "max number of goroutines to use at any given time")
-	flag.BoolVar(&config.exact, "e", false, "search for exact match")
-	flag.BoolVar(&config.json, "j", false, "print results as json")
+	flag.BoolVar(&config.exact, "e", false, "use exact matching for base query")
+	flag.BoolVar(&config.json, "j", false, "print results as json (formatted as link: blurb)")
 	flag.StringVar(&config.os, "os", "w", "operating system (w or m)")
 	flag.BoolVar(&config.terms, "t", false, "check stdin for additional search terms")
 	flag.IntVar(&config.timeout, "to", 5000, "timeout (in ms, default 5000)")
+	flag.BoolVar(&config.urls, "u", false, "include urls in output")
 	flag.BoolVar(&config.verbose, "v", false, "verbose output")
 	flag.BoolVar(&config.write, "w", false, "write results to file")
 	flag.Parse()

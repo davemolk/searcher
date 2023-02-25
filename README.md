@@ -58,23 +58,25 @@ go install github.com/davemolk/searcher/cmd/searcher@latest
 ```
 Usage of searcher:
   -c int
-    	Max number of goroutines to use at any given time.
+    	max number of goroutines to use at any given time
   -e bool
-    	Exact matching for query.
+    	exact matching for query
   -j bool
-    	Print results as JSON.
+    	print results as JSON
   -q string
-    	Base search query.
+    	base search query
   -os string
     	operating system (used in user agent and header creation)
   -t bool
-    	Check Stdin for additional search terms.
+    	check stdin for additional search terms
   -to int
-    	Request timeout (in ms).
+    	request timeout (in ms)
+  -u bool
+    	include urls in output
   -v bool
-    	Verbose output.
+    	verbose output
   -w bool
-    	Write results to file.
+    	write results to file
 ```
 
 ## Note

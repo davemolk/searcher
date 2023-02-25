@@ -113,7 +113,7 @@ func (s *searcher) parseSearchResults(data *bytes.Buffer, term string, pd parseD
 		cleanedLink := s.cleanLinks(link)
 		cleanedBlurb := s.cleanBlurb(blurb)
 		if !s.config.json {
-			s.printStdout(cleanedBlurb)
+			s.printStdout(cleanedBlurb, cleanedLink)
 		}
 		if term != "" {
 			s.searches.storeSearches(term, cleanedLink, cleanedBlurb)
@@ -161,9 +161,12 @@ func (s *searcher) cleanLinks(str string) string {
 
 // printStdout truncates any blurb with a length longer
 // than 200 and prints to stdout.
-func (s *searcher) printStdout(blurb string) {
+func (s *searcher) printStdout(blurb, link string) {
 	if len(blurb) > 200 {
 		blurb = blurb[:200]
+	}
+	if s.config.urls && len(blurb) > 0 {
+		fmt.Println(link)
 	}
 	fmt.Println(blurb)
 	fmt.Println()
